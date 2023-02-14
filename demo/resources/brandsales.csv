@@ -1,4 +1,4 @@
-Country,Month,Gross_Revenue,Discount,Net_Revenue
+Brand,Month,Gross_Revenue,Discount,Net_Revenue
 Dunkin Donuts,2022-08-15,"$199,346.70",39,"$121,601.49"
 Dunkin Donuts,2022-07-15,"$180,936.88",38,"$112,180.87"
 Dunkin Donuts,2022-06-15,"$201,337.86",38,"$124,829.47"
