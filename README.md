@@ -446,8 +446,8 @@ A BigLake table called brandsales -
 
 ### 4.16. Row Access Policies
 Create Row Access Policies, one for each user - dunkin_user@ and buffalo_user@ -
-1. Row Access Policy for the BigLake table brandsales called 'Dunkin_filter' associated with the IAM group dunkin-sales@ on filter Brand="Dunkin Donuts"
-2. Row Access Policy for the BigLake table brandsales called 'Buffalo_filter' associated with the IAM group buffalo-sales@ on filter Brand="Buffalo Wild Wings"
+1. Row Access Policy for the BigLake table brandsales called 'dunkin_filter' associated with the IAM group dunkin-sales@ on filter Brand="Dunkin Donuts"
+2. Row Access Policy for the BigLake table brandsales called 'buffalo_filter' associated with the IAM group buffalo-sales@ on filter Brand="Buffalo Wild Wings"
 
 <hr>
 
@@ -486,7 +486,7 @@ This section demonstrates how you can use BigLake to restrict access based on po
 
 #### 5.2.1. Switch to the "buffalo_user" profile
 
-Switch profiles to the usa_user account in your Chrome browser. Make sure to select the project you created in the step above.  <br>
+Switch profiles to the buffalo_user account in your Chrome browser. Make sure to select the project you created in the step above.  <br>
 **NOTE:** If the Chrome profile for the user does not show the user as part of an organization, close that browser and open an incognito browser and login and complete the lab.
 
 In this example, the project is 'biglake-demov4' as shown below:
@@ -563,7 +563,7 @@ Author's output-
 
 ```
 Ticket cache: FILE:/tmp/krb5cc_1001
-Default principal: dataproc/gdpsc-usa-dataproc-cluster-m.us-central1-a.c.biglake-dataproc-spark-lab.internal@US-CENTRAL1-A.C.BIGLAKE-DATAPROC-SPARK-LAB.INTERNAL
+Default principal: dataproc/gdpsc-buffalo-dataproc-cluster-m.us-central1-a.c.biglake-dataproc-spark-lab.internal@US-CENTRAL1-A.C.BIGLAKE-DATAPROC-SPARK-LAB.INTERNAL
 
 Valid starting     Expires            Service principal
 10/18/22 14:44:05  10/19/22 00:44:05  krbtgt/US-CENTRAL1-A.C.BIGLAKE-DATAPROC-SPARK-LAB.INTERNAL@US-CENTRAL1-A.C.BIGLAKE-DATAPROC-SPARK-LAB.INTERNAL
@@ -595,7 +595,7 @@ This notebook demonstrates finegrained BigLake powered permissions, with a Icecr
 This concludes the exercise of row and column level security powered by Biglake. Lets repeat the same with the user dunkin_user@
 
 
-### 5.3. Principle of Least Privilege: Australia country based restricted row and column access
+### 5.3. Principle of Least Privilege: Dunkin Donuts brand based restricted row and column access
 This section demonstrates how you can use BigLake to restrict access based on policies. <br>
 1. Row Level Security: "dunkin_user" can only access data for (Brand=)Dunkin Donuts in the brandsales table 
 2. Column Level Security: "dunkin_user" can see the columns Discount and Net_Revenue 
@@ -612,13 +612,13 @@ gcloud dataproc clusters enable-personal-auth-session \
     --access-boundary=<(echo -n "{}") \
    ${USER_PREFIX}-dataproc-cluster
 ```
-3. Log into the aus-dataproc-cluster cluster, and go to "WEB INTERFACES" and click on JupyterLab
+3. Log into the dunkin-dataproc-cluster cluster, and go to "WEB INTERFACES" and click on JupyterLab
 4. In JupyterLab, open terminal and run kinit to authenticate and get a ticket
 ```
 kinit -kt /etc/security/keytab/dataproc.service.keytab dataproc/$(hostname -f)
 ```
 
-5. The major difference is that in cell 12, you should see data only for the 'Australia' as shown below:
+5. The major difference is that in cell 12, you should see data only for the 'Dunkin Donuts' as shown below:
 ![PICT8](./images/jupyter7.png)
 <br>
 
@@ -626,7 +626,7 @@ kinit -kt /etc/security/keytab/dataproc.service.keytab dataproc/$(hostname -f)
 
 ### 5.4. Principle of Least Privilege: Restricted column access for the Corporate user (no access to financial data)
 This section demonstrates how you can use BigLake to restrict access based on policies. <br>
-1. Row Level Security: corporate_user@ can access data for any country in the brandsales table (unlike dunkin_user@ and buffalo_user@ that could see data only for their country)
+1. Row Level Security: corporate_user@ can access data for any brand in the brandsales table (unlike dunkin_user@ and buffalo_user@ that could see data only for their brand)
 2. Column Level Security: corporate_user@ can see all the columns except sensitive data columns Discount and Net_Revenue for which the user does not have permissions
 
 Follow steps 5.2.1 through 5.2.4 from above, abbreviated for your convenienc-<br>
@@ -641,13 +641,13 @@ gcloud dataproc clusters enable-personal-auth-session \
     --access-boundary=<(echo -n "{}") \
    ${USER_PREFIX}-dataproc-cluster
 ```
-3. Log into the mkt-dataproc-cluster cluster, and go to "WEB INTERFACES" and click on JupyterLab
+3. Log into the corporate-dataproc-cluster cluster, and go to "WEB INTERFACES" and click on JupyterLab
 4. In JupyterLab, open terminal and run kinit to authenticate and get a ticket
 ```
 kinit -kt /etc/security/keytab/dataproc.service.keytab dataproc/$(hostname -f)
 ```
 
-5.  Cell 6 will throw an error, because mkt_user does not have access to all the columns -> specifically does not have access to Discount and Net_Revenue. <br>
+5.  Cell 6 will throw an error, because corporate_user does not have access to all the columns -> specifically does not have access to Discount and Net_Revenue. <br>
 Edit cell 5 as follows and run the rest of the cells. They shoudl execute file.
 ```
 rawDF = spark.read \
