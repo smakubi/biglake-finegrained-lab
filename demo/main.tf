@@ -121,8 +121,8 @@ resource "google_compute_router_nat" "nat-config" {
 
 resource "null_resource" "create_groups" {
    for_each = {
-      "us-sales" : "",
-      "australia-sales" : ""
+      "buffalo-sales" : "",
+      "dunkin-sales" : ""
     }
   provisioner "local-exec" {
     command = <<-EOT
@@ -152,8 +152,8 @@ resource "time_sleep" "wait_30_seconds" {
     
 resource "null_resource" "create_memberships" {
    for_each = {
-      "us-sales" : format("%s",var.usa_username),
-      "australia-sales" : format("%s",var.aus_username)
+      "buffalo-sales" : format("%s",var.buffalo_username),
+      "dunkin-sales" : format("%s",var.dunkin_username)
     }
   provisioner "local-exec" {
     command = <<-EOT
@@ -173,12 +173,12 @@ resource "null_resource" "create_memberships" {
 }
 
 /******************************************
-9. Creation of IAM group membership to the sales groups for the marketing user
+9. Creation of IAM group membership to the sales groups for the corporate user
 *******************************************/
-resource "null_resource" "create_memberships_mkt" {
+resource "null_resource" "create_memberships_corporate" {
    for_each = {
-      "us-sales" : format("%s",var.mkt_username),
-      "australia-sales" : format("%s",var.mkt_username)
+      "buffalo-sales" : format("%s",var.corporate_username),
+      "dunkin-sales" : format("%s",var.corporate_username)
     }
   provisioner "local-exec" {
     command = <<-EOT
@@ -206,9 +206,9 @@ resource "google_project_iam_binding" "project_viewer" {
   role    = "roles/viewer"
 
   members = [
-    "user:${var.usa_username}@${var.org_id}",
-    "user:${var.aus_username}@${var.org_id}",
-    "user:${var.mkt_username}@${var.org_id}"
+    "user:${var.buffalo_username}@${var.org_id}",
+    "user:${var.dunkin_username}@${var.org_id}",
+    "user:${var.corporate_username}@${var.org_id}"
   ]
 }
 
@@ -220,9 +220,9 @@ resource "google_project_iam_binding" "dataproc_admin" {
   role    = "roles/dataproc.editor"
 
   members = [
-    "user:${var.usa_username}@${var.org_id}",
-    "user:${var.aus_username}@${var.org_id}",
-    "user:${var.mkt_username}@${var.org_id}"
+    "user:${var.buffalo_username}@${var.org_id}",
+    "user:${var.dunkin_username}@${var.org_id}",
+    "user:${var.corporate_username}@${var.org_id}"
   ]
 }
 
@@ -233,9 +233,9 @@ resource "google_project_iam_binding" "dataproc_admin" {
 
 resource "google_storage_bucket" "create_buckets" {
   for_each = {
-    "aus" : "",
-    "usa" : "",
-    "mkt" : "",
+    "dunkin" : "",
+    "buffalo" : "",
+    "corporate" : "",
   }
   name                              = "dataproc-bucket-${each.key}-${var.project_nbr}"
   location                          = local.location
@@ -258,17 +258,17 @@ resource "google_storage_bucket" "create_temp_bucket" {
 }
   
 /******************************************
-14. IceCreamSales.csv dataset upload to each user bucket 
+14. brandsales.csv dataset upload to each user bucket 
 *******************************************/
 
 resource "google_storage_bucket_object" "gcs_objects" {
   for_each = {
-    "aus" : "",
-    "usa" : "",
-    "mkt" : "",
+    "dunkin" : "",
+    "buffalo" : "",
+    "corporate" : "",
   }
-  name        = "data/IceCreamSales.csv"
-  source      = "./resources/IceCreamSales.csv"
+  name        = "data/brandsales.csv"
+  source      = "./resources/brandsales.csv"
   bucket      = "dataproc-bucket-${each.key}-${var.project_nbr}"
   depends_on = [google_storage_bucket.create_buckets]
 }
@@ -282,9 +282,9 @@ resource "google_storage_bucket_iam_binding" "temp_dataproc_bucket_policy" {
   bucket = local.dataproc_temp_bucket
   role = "roles/storage.admin"
   members = [
-          "user:${var.aus_username}@${var.org_id}",
-          "user:${var.usa_username}@${var.org_id}",
-          "user:${var.mkt_username}@${var.org_id}"
+          "user:${var.dunkin_username}@${var.org_id}",
+          "user:${var.buffalo_username}@${var.org_id}",
+          "user:${var.corporate_username}@${var.org_id}"
   ]
 
   depends_on = [google_storage_bucket.create_temp_bucket]
@@ -294,28 +294,28 @@ resource "google_storage_bucket_iam_binding" "temp_dataproc_bucket_policy" {
 16. Storage admin permissions granting to each user to ONLY their bucket
 *******************************************/
 
-resource "google_storage_bucket_iam_binding" "aus_dataproc_bucket_policy" {
-  bucket = "dataproc-bucket-aus-${var.project_nbr}"
+resource "google_storage_bucket_iam_binding" "dunkin_dataproc_bucket_policy" {
+  bucket = "dataproc-bucket-dunkin-${var.project_nbr}"
   role = "roles/storage.admin"
-  members = ["user:${var.aus_username}@${var.org_id}"]
+  members = ["user:${var.dunkin_username}@${var.org_id}"]
 
   depends_on = [google_storage_bucket.create_buckets]
 }
 
 
-resource "google_storage_bucket_iam_binding" "usa_dataproc_bucket_policy" {
-  bucket = "dataproc-bucket-usa-${var.project_nbr}"
+resource "google_storage_bucket_iam_binding" "buffalo_dataproc_bucket_policy" {
+  bucket = "dataproc-bucket-buffalo-${var.project_nbr}"
   role = "roles/storage.admin"
-  members = ["user:${var.usa_username}@${var.org_id}"]
+  members = ["user:${var.buffalo_username}@${var.org_id}"]
 
   depends_on = [google_storage_bucket.create_buckets]
 }
 
 
-resource "google_storage_bucket_iam_binding" "mkt_dataproc_bucket_policy" {
-  bucket = "dataproc-bucket-mkt-${var.project_nbr}"
+resource "google_storage_bucket_iam_binding" "corporate_dataproc_bucket_policy" {
+  bucket = "dataproc-bucket-corporate-${var.project_nbr}"
   role = "roles/storage.admin"
-  members = ["user:${var.mkt_username}@${var.org_id}"]
+  members = ["user:${var.corporate_username}@${var.org_id}"]
 
   depends_on = [google_storage_bucket.create_buckets]
 }
@@ -337,9 +337,9 @@ resource "google_project_iam_member" "service_account_worker_role" {
 
 resource "google_dataproc_cluster" "dataproc_clusters" {
   for_each = {
-    "${var.aus_username}" : "aus",
-    "${var.usa_username}" : "usa",
-    "${var.mkt_username}" : "mkt",
+    "${var.dunkin_username}" : "dunkin",
+    "${var.buffalo_username}" : "buffalo",
+    "${var.corporate_username}" : "corporate",
   }
   name     = format("%s-dataproc-cluster", each.value)
   project  = var.project_id
@@ -407,36 +407,36 @@ resource "google_dataproc_cluster" "dataproc_clusters" {
 }
 
 /******************************************
-# 19. Uploading of IceCream notebook to each user's GCS bucket where Dataproc expects it
+# 19. Uploading of brands notebook to each user's GCS bucket where Dataproc expects it
 *******************************************/
 
-resource "google_storage_bucket_object" "gcs_objects_aus_dataproc" {
+resource "google_storage_bucket_object" "gcs_objects_dunkin_dataproc" {
   for_each = {
-    "./resources/IceCream.ipynb" : "notebooks/jupyter/IceCream.ipynb"
+    "./resources/brands.ipynb" : "notebooks/jupyter/brands.ipynb"
   }
   name        = each.value
   source      = each.key
-  bucket      = "dataproc-bucket-aus-${var.project_nbr}"
+  bucket      = "dataproc-bucket-dunkin-${var.project_nbr}"
   depends_on = [google_dataproc_cluster.dataproc_clusters]
 }
 
-resource "google_storage_bucket_object" "gcs_objects_usa_dataproc" {
+resource "google_storage_bucket_object" "gcs_objects_buffalo_dataproc" {
   for_each = {
-    "./resources/IceCream.ipynb" : "notebooks/jupyter/IceCream.ipynb"
+    "./resources/brands.ipynb" : "notebooks/jupyter/brands.ipynb"
   }
   name        = each.value
   source      = each.key
-  bucket      = "dataproc-bucket-usa-${var.project_nbr}"
+  bucket      = "dataproc-bucket-buffalo-${var.project_nbr}"
   depends_on = [google_dataproc_cluster.dataproc_clusters]
 }
 
-resource "google_storage_bucket_object" "gcs_objects_mkt_dataproc" {
+resource "google_storage_bucket_object" "gcs_objects_corporate_dataproc" {
   for_each = {
-    "./resources/IceCream.ipynb" : "notebooks/jupyter/IceCream.ipynb"
+    "./resources/brands.ipynb" : "notebooks/jupyter/brands.ipynb"
   }
   name        = each.value
   source      = each.key
-  bucket      = "dataproc-bucket-mkt-${var.project_nbr}"
+  bucket      = "dataproc-bucket-corporate-${var.project_nbr}"
   depends_on = [google_dataproc_cluster.dataproc_clusters]
 }
 
@@ -468,12 +468,12 @@ resource "google_data_catalog_policy_tag" "financial_data_policy_tag" {
 }
 
 /******************************************
-# 22. Granting of fine grained reader permisions to us_user@ and aus_user@
+# 22. Granting of fine grained reader permisions to buffalo_user@ and dunkin_user@
 *******************************************/
 resource "google_data_catalog_policy_tag_iam_member" "member" {
   for_each = {
-    "user:${var.aus_username}@${var.org_id}" : "",
-    "user:${var.usa_username}@${var.org_id}" : ""
+    "user:${var.dunkin_username}@${var.org_id}" : "",
+    "user:${var.buffalo_username}@${var.org_id}" : ""
 
   }
   policy_tag = google_data_catalog_policy_tag.financial_data_policy_tag.name
@@ -527,12 +527,12 @@ resource "google_bigquery_table" "biglakeTable" {
     ## set up a dependency on the prior delay.
     # depends_on = [time_sleep.wait_7_min]
     dataset_id = google_bigquery_dataset.bigquery_dataset.dataset_id
-    table_id   = "IceCreamSales"
+    table_id   = "brandsales"
     project = var.project_id
     schema = <<EOF
     [
             {
-                "name": "country",
+                "name": "Brand",
                 "type": "STRING"
             },
             {
@@ -578,7 +578,7 @@ resource "google_bigquery_table" "biglakeTable" {
         }
 
         source_uris = [
-            "gs://dataproc-bucket-aus-${var.project_nbr}/data/IceCreamSales.csv",
+            "gs://dataproc-bucket-dunkin-${var.project_nbr}/data/brandsales.csv",
         ]
     }
     deletion_protection = false
@@ -590,20 +590,20 @@ resource "google_bigquery_table" "biglakeTable" {
 }
   
 /******************************************
-# 27. Creation of Row Access Policy for Australia
+# 27. Creation of Row Access Policy for Dunkin Donuts
 *******************************************/
-resource "null_resource" "create_aus_filter" {
+resource "null_resource" "create_dunkin_filter" {
   provisioner "local-exec" {
     command = <<-EOT
       read -r -d '' QUERY << EOQ
       CREATE ROW ACCESS POLICY
-        Australia_filter
+        dunkin_filter
         ON
-        ${local.dataset_name}.IceCreamSales
+        ${local.dataset_name}.brandsales
         GRANT TO
-        ("group:australia-sales@${var.org_id}")
+        ("group:dunkin-sales@${var.org_id}")
         FILTER USING
-        (Country="Australia")
+        (Brand="Dunkin Donuts")
       EOQ
       bq query --nouse_legacy_sql $QUERY
     EOT
@@ -613,24 +613,24 @@ resource "null_resource" "create_aus_filter" {
 }
 
 /******************************************
-# 28. Creation of Row Access Policy for United States
+# 28. Creation of Row Access Policy for Buffalo Wild Wings
 *******************************************/
-resource "null_resource" "create_us_filter" {
+resource "null_resource" "create_buffalo_filter" {
   provisioner "local-exec" {
     command = <<-EOT
       read -r -d '' QUERY << EOQ
       CREATE ROW ACCESS POLICY
-        US_filter
+        buffalo_filter
         ON
-        ${local.dataset_name}.IceCreamSales
+        ${local.dataset_name}.brandsales
         GRANT TO
-        ("group:us-sales@${var.org_id}")
+        ("group:buffalo-sales@${var.org_id}")
         FILTER USING
-        (Country="United States")
+        (Brand="Buffalo Wild Wings")
       EOQ
       bq query --nouse_legacy_sql $QUERY
     EOT
   }
 
-  depends_on = [null_resource.create_aus_filter]
+  depends_on = [null_resource.create_dunkin_filter]
 }
