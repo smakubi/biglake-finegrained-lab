@@ -379,15 +379,15 @@ c) BigQuery Connection Default Service Account:<br>
 Covered below
 
 ### 4.4. GCS buckets
-1. dataproc-bucket-aus-YOUR_PROJECT_NUMBER
-2. dataproc-bucket-mkt-YOUR_PROJECT_NUMBER
-3. dataproc-bucket-usa-YOUR_PROJECT_NUMBER
+1. dataproc-bucket-dunkin-YOUR_PROJECT_NUMBER
+2. dataproc-bucket-corporate-YOUR_PROJECT_NUMBER
+3. dataproc-bucket-buffalo-YOUR_PROJECT_NUMBER
 4. dataproc-temp-YOUR_PROJECT_NUMBER
 
 ### 4.5. GCS bucket permissions
-1. dataproc-bucket-aus-YOUR_PROJECT_NUMBER: Storage Admin to dunkin_user@
-2. dataproc-bucket-mkt-YOUR_PROJECT_NUMBER: Storage Admin to corporate_user@
-3. dataproc-bucket-usa-YOUR_PROJECT_NUMBER: Storage Admin to buffalo_user@
+1. dataproc-bucket-dunkin-YOUR_PROJECT_NUMBER: Storage Admin to dunkin_user@
+2. dataproc-bucket-corporate-YOUR_PROJECT_NUMBER: Storage Admin to corporate_user@
+3. dataproc-bucket-buffalo-YOUR_PROJECT_NUMBER: Storage Admin to buffalo_user@
 4. dataproc-temp-YOUR_PROJECT_NUMBER: Storage Admin to all three users created
 
 ### 4.6. Network resources
@@ -528,7 +528,7 @@ Periodically refreshing credentials for cluster buffalo-dataproc-cluster. This w
 
 Still signed in as the Buffalo user, in a separate tab in the same browser window, navigate to the cloud console (console.cloud.google.com) and then the Dataproc UI:
 
-1. Click on the usa-dataproc-cluster link 
+1. Click on the buffalo-dataproc-cluster link 
 <br>
 
 2. Then click on the 'WEB INTERFACES' link 
@@ -682,9 +682,9 @@ terraform destroy \
   -var="project_nbr=${PROJECT_NBR}" \
   -var="org_id=${ORG_ID}" \
   -var="location=${LOCATION}" \
-  -var="usa_username=${BUFFALO_USERNAME}" \
-  -var="aus_username=${DUNKIN_USERNAME}" \
-  -var="mkt_username=${CORPORATE_USERNAME}" \
+  -var="buffalo_username=${BUFFALO_USERNAME}" \
+  -var="dunkin_username=${DUNKIN_USERNAME}" \
+  -var="corporate_username=${CORPORATE_USERNAME}" \
   --auto-approve
  ```
 
