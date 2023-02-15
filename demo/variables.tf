@@ -36,19 +36,19 @@ variable "project_nbr" {
   type        = string
 }
 
-variable "aus_username" {
+variable "dunkin_username" {
   type        = string
-  default     = "aus_user"
+  default     = "dunkin_user"
 }
 
-variable "usa_username" {
+variable "buffalo_username" {
   type        = string
-  default     = "usa_user"
+  default     = "buffalo_user"
 }
 
-variable "mkt_username" {
+variable "corporate_username" {
   type        = string
-  default     = "mkt_user"
+  default     = "corporate_user"
 }
 
 
